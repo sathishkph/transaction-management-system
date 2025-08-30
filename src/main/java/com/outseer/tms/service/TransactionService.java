@@ -4,6 +4,7 @@ import com.outseer.tms.dto.AccountDto;
 import com.outseer.tms.dto.Response;
 import com.outseer.tms.dto.TransactionRequestDto;
 import com.outseer.tms.entity.TransactionEntity;
+import com.outseer.tms.exception.DuplicateTransactionIdException;
 import com.outseer.tms.exception.InsufficientBalanceException;
 import com.outseer.tms.exception.UserNotFoundException;
 import com.outseer.tms.helper.DateUtil;
@@ -50,6 +51,10 @@ public class TransactionService {
                     throw new UserNotFoundException("User not found with id: " + userId);
                 }
 
+                if (transactionRepository.existsById(transactionRequestDto.getTransactionId())) {
+                    throw new DuplicateTransactionIdException("Transaction already exists with id: " + transactionRequestDto.getTransactionId());
+                }
+
                 //validate debit transactions;
                 if (transactionRequestDto.getAmount() < 0) {
                     AccountDto accountDto = accountService.findById(userId);
@@ -70,6 +75,9 @@ public class TransactionService {
                 throw e;
             } catch (InsufficientBalanceException e) {
                 log.info("Insufficient Balance Exception for this userId:{} ,transactionId : {}", userId, transactionRequestDto.getTransactionId());
+                throw e;
+            } catch (DuplicateTransactionIdException e) {
+                log.info("Duplicate Transaction ID  Exception for this userId:{} ,transactionId : {}", userId, transactionRequestDto.getTransactionId());
                 throw e;
             } catch (Exception e) {
                 log.info("Transactionfor this userId:{},transactionId : {} ,Exception:{}", userId, transactionRequestDto.getTransactionId(), e.getMessage());

@@ -1,6 +1,7 @@
 package com.outseer.tms.advice;
 
 import com.outseer.tms.dto.ErrorCode;
+import com.outseer.tms.exception.DuplicateTransactionIdException;
 import com.outseer.tms.exception.InsufficientBalanceException;
 import com.outseer.tms.dto.ErrorResponse;
 import com.outseer.tms.exception.UserIdAlreadyExistsException;
@@ -22,6 +23,12 @@ public class ExceptionController {
     public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
         ErrorResponse error = new ErrorResponse(ErrorCode.USER_NOT_FOUND.getCode(), ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(DuplicateTransactionIdException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateTransactionId(DuplicateTransactionIdException ex) {
+        ErrorResponse error = new ErrorResponse(ErrorCode.DUPLICATE_TRANSACTION.getCode(), ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UserIdAlreadyExistsException.class)

@@ -3,7 +3,7 @@ package com.outseer.tms.dto;
 public enum ErrorCode {
     USER_NOT_FOUND("USER_NOT_FOUND", "User not found"),
     INSUFFICIENT_BALANCE("INSUFFICIENT_BALANCE", "Insufficient balance"),
-    USER_ID_EXISTS("USER_ID_EXISTS", "User id exists");
+    USER_ID_EXISTS("USER_ID_EXISTS", "User id exists"), DUPLICATE_TRANSACTION("TRANSACTION_ID_EXIST","transaction id exist" );
 
     private final String code;
     private final String message;

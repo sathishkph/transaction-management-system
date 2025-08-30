@@ -4,6 +4,7 @@ import com.outseer.tms.dto.AccountDto;
 import com.outseer.tms.dto.Response;
 import com.outseer.tms.dto.TransactionRequestDto;
 import com.outseer.tms.entity.TransactionEntity;
+import com.outseer.tms.exception.DuplicateTransactionIdException;
 import com.outseer.tms.exception.InsufficientBalanceException;
 import com.outseer.tms.exception.UserNotFoundException;
 import com.outseer.tms.repo.TransactionRepository;
@@ -72,6 +73,20 @@ class TransactionServiceTest {
         when(accountService.findById(VALID_USER_ID)).thenReturn(new AccountDto(VALID_USER_ID, 100.0, 2L));
 
         assertThrows(InsufficientBalanceException.class,
+                () -> transactionService.saveTransactions(request));
+
+        verify(transactionRepository, never()).save(any());
+    }
+
+    @Test
+    void testSaveTransaction_Duplicate_Transaction() {
+        TransactionRequestDto request = new TransactionRequestDto("t3", VALID_USER_ID, -500.0, "2025-08-29T12:00:00");
+
+        when(userRepository.existsById(VALID_USER_ID)).thenReturn(true);
+        when(transactionRepository.existsById("t3")).thenReturn(true);
+        when(accountService.findById(VALID_USER_ID)).thenReturn(new AccountDto(VALID_USER_ID, 100.0, 2L));
+
+        assertThrows(DuplicateTransactionIdException.class,
                 () -> transactionService.saveTransactions(request));
 
         verify(transactionRepository, never()).save(any());
