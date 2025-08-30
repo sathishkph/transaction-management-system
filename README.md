@@ -1,5 +1,6 @@
 **Transaction Management System**
-A Spring Boot–based backend service that manages users and financial transactions, with built-in support for:
+     
+  Spring Boot–based backend service that manages users and financial transactions, with built-in support for:
 1. Transaction persistence (JPA/Hibernate + In Memory DB (to keep it simple.can be replaced with Relational))
 2. User account management
 3. Balance validation (prevent overdraft transactions)
@@ -68,6 +69,125 @@ A Spring Boot–based backend service that manages users and financial transacti
 Default port: http://localhost:8080
 Use below postman link to test endpoints.
 https://sathish-9143347.postman.co/workspace/sathish's-Workspace~e6b375ae-2a84-493a-8be0-0199a20a2466/collection/47930490-70131c90-bce9-4fa1-ba47-09248b36b097?action=share&creator=47930490
+
+**🔹 Create User**
+
+POST http://localhost:8080/users
+
+Body (JSON):
+
+{
+"userId": "sathish1234",
+"name": "Sathish Kumar P H",
+"email": "sathishkph@yahoo.com"
+}
+
+
+Response (success):
+
+{
+"success": true,
+"message": "User created successfully."
+}
+
+
+**🔹 Get User by ID**
+
+GET http://localhost:8080/users/sathish1234
+
+Response:
+
+{
+"userId": "sathish1234",
+"name": "Sathish Kumar P H",
+"email": "sathishkph@yahoo.com",
+"createdAt": "2025-08-29T10:00:00"
+}
+
+
+🔹 **Create Transaction**
+
+POST http://localhost:8080/api/transactions
+
+Body (JSON):
+{
+"transactionId": "txn001",
+"userId": "sathish1234",
+"amount": 1000.00,
+"timeStamp": "2025-08-29T11:00:00"
+}
+Response (success):
+
+{
+"success": true,
+"message": "Transaction created successfully."
+}
+
+Response(Duplicate Transaction)
+{
+"errorCode": "TRANSACTION_ID_EXIST",
+"message": "Transaction already exists with id: txn001"
+}
+
+
+**🔹 Get Transactions by User (with date filter + paging)**
+
+GET http://localhost:8080/transactions?userId=sathish1234&startDate=2025-08-29T10:18:30.122&endDate=2025-08-29T18:18:30.123&page=0&size=10
+
+**Response**
+{
+"content": [
+{
+"transactionId": "txn001",
+"userId": "sathish1234",
+"amount": 1000.0,
+"timeStamp": "2025-08-29T11:00"
+},
+{
+"transactionId": "txn002",
+"userId": "sathish1234",
+"amount": -200.0,
+"timeStamp": "2025-08-29T12:30"
+}
+],
+"pageable": {
+"pageNumber": 0,
+"pageSize": 10,
+"sort": {
+"empty": true,
+"unsorted": true,
+"sorted": false
+},
+"offset": 0,
+"unpaged": false,
+"paged": true
+},
+"totalPages": 1,
+"totalElements": 2,
+"last": true,
+"size": 10,
+"number": 0,
+"sort": {
+"empty": true,
+"unsorted": true,
+"sorted": false
+},
+"numberOfElements": 2,
+"first": true,
+"empty": false
+}
+
+**🔹 Get Account Summary**
+
+GET http://localhost:8080/account-summary/sathish1234
+
+Response:
+
+{
+"userId": "sathish1234",
+"currentBalance": 1300.0,
+"transactionCount": 3
+}
 
 
 **DB Scripts:**
