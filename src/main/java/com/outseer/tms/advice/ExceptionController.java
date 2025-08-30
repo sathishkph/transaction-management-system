@@ -1,5 +1,6 @@
 package com.outseer.tms.advice;
 
+import com.outseer.tms.dto.ErrorCode;
 import com.outseer.tms.exception.InsufficientBalanceException;
 import com.outseer.tms.dto.ErrorResponse;
 import com.outseer.tms.exception.UserIdAlreadyExistsException;
@@ -13,19 +14,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ExceptionController {
     @ExceptionHandler(InsufficientBalanceException.class)
     public ResponseEntity<ErrorResponse> handleInsufficientBalance(InsufficientBalanceException ex) {
-        ErrorResponse error = new ErrorResponse("Insufficient Balance", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(ErrorCode.INSUFFICIENT_BALANCE.getCode(), ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
-        ErrorResponse error = new ErrorResponse("User Not Found", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(ErrorCode.USER_NOT_FOUND.getCode(), ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(UserIdAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleUserIdExists(UserIdAlreadyExistsException ex) {
-        ErrorResponse error = new ErrorResponse("User ID Exists", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(ErrorCode.USER_ID_EXISTS.getCode(), ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(Exception.class)

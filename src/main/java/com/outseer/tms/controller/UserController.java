@@ -3,7 +3,6 @@ package com.outseer.tms.controller;
 import com.outseer.tms.dto.Response;
 import com.outseer.tms.dto.UserRequestDto;
 import com.outseer.tms.dto.UserResponseDto;
-import com.outseer.tms.entity.UserEntity;
 import com.outseer.tms.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
