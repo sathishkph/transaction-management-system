@@ -89,7 +89,7 @@ public class UserService {
             UserEntity userEntity = userRepository.findById(userId).
                     orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
             userRepository.delete(userEntity);
-            response = new Response(true, "User created successfully.");
+            response = new Response(true, "User Deleted successfully.");
             return response;
         } catch (UserNotFoundException e) {
             log.info("User not found for this userId:{}", userId);
