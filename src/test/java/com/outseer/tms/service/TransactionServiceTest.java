@@ -112,9 +112,9 @@ class TransactionServiceTest {
         doThrow(new RuntimeException("DB failure"))
                 .when(transactionRepository).save(any(TransactionEntity.class));
 
-        Response response = transactionService.saveTransactions(request);
-
-        assertFalse(response.isSuccess());
-        assertEquals("Transaction creation failed.", response.getMessage());
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+            transactionService.saveTransactions(request);
+        });
+        assertEquals("DB failure", thrown.getMessage());
     }
 }

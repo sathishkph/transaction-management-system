@@ -48,7 +48,7 @@ public class UserService {
             throw e;
         } catch (Exception e) {
             log.info("User creation Exception for this userId:{},Exception:{}", userId, e.getMessage());
-            return new Response(false, "User creations failed.");
+           throw e;
         }
 
     }
@@ -96,7 +96,7 @@ public class UserService {
             throw e;
         } catch (Exception e) {
             log.info("User deletion Exception for this userId:{},Exception:{}", userId, e.getMessage());
-            return new Response(false, "User deletion failed.");
+           throw e;
         }
     }
 }

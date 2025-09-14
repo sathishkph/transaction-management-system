@@ -81,7 +81,7 @@ public class TransactionService {
                 throw e;
             } catch (Exception e) {
                 log.info("Transactionfor this userId:{},transactionId : {} ,Exception:{}", userId, transactionRequestDto.getTransactionId(), e.getMessage());
-                return new Response(false, "Transaction creation failed.");
+                throw e;
             }
         }
     }

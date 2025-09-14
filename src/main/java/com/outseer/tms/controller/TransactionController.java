@@ -3,6 +3,7 @@ package com.outseer.tms.controller;
 import com.outseer.tms.dto.Response;
 import com.outseer.tms.dto.TransactionRequestDto;
 import com.outseer.tms.service.TransactionService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,7 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping("/transactions")
-    public ResponseEntity<Response> saveTransaction(@RequestBody TransactionRequestDto transactionRequestDto){
+    public ResponseEntity<Response> saveTransaction(@Valid @RequestBody TransactionRequestDto transactionRequestDto){
         return ResponseEntity.ok(transactionService.saveTransactions(transactionRequestDto));
     }
 

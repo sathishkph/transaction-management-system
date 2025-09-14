@@ -1,5 +1,6 @@
 package com.outseer.tms.dto;
 
+import com.outseer.tms.helper.IsoTimestamp;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,5 +17,6 @@ public class TransactionRequestDto {
 
     private Double amount;
     @NotBlank
+    @IsoTimestamp
     private String timeStamp;
 }
