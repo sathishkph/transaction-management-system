@@ -31,6 +31,9 @@ public class AccountService {
                 throw new UserNotFoundException("User not found with id: " + userId);
             }
             AccountDto accountDto = transactionRepository.findBalanceAndCountByUserId(userId);
+            if (accountDto == null){
+                return new AccountDto(userId,0.0,0L);
+            }
             return accountDto;
         } catch (UserNotFoundException e) {
             log.info("User not found for this userId:{},transactionId : {}", userId);

@@ -59,7 +59,7 @@ public class TransactionService {
                 if (transactionRequestDto.getAmount() < 0) {
                     AccountDto accountDto = accountService.findById(userId);
                     if (accountDto.getCurrentBalance() < Math.abs(transactionRequestDto.getAmount())) {
-                        throw new InsufficientBalanceException("Insufficient Balance");
+                        throw new InsufficientBalanceException("Insufficient Balance.Please try again");
                     }
                 }
                 TransactionEntity transactionEntity = new TransactionEntity();
