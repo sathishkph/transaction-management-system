@@ -11,6 +11,8 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 
 @Service
 @AllArgsConstructor
@@ -32,7 +34,7 @@ public class AccountService {
             }
             AccountDto accountDto = transactionRepository.findBalanceAndCountByUserId(userId);
             if (accountDto == null){
-                return new AccountDto(userId,0.0,0L);
+                return new AccountDto(userId, BigDecimal.ZERO,0L);
             }
             return accountDto;
         } catch (UserNotFoundException e) {

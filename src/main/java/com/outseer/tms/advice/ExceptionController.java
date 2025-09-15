@@ -35,16 +35,20 @@ public class ExceptionController {
     @ExceptionHandler(DuplicateTransactionIdException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateTransactionId(DuplicateTransactionIdException ex) {
         ErrorResponse error = new ErrorResponse(ErrorCode.DUPLICATE_TRANSACTION, ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(UserIdAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleUserIdExists(UserIdAlreadyExistsException ex) {
         ErrorResponse error = new ErrorResponse(ErrorCode.USER_ID_EXISTS, ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericExceptions(Exception ex) {
+
+        if (ex.getMessage().contains("favicon.ico")) {
+            return ResponseEntity.notFound().build();  // Silent 404
+        }
         log.error("Internal error occurred: {}", ex.getMessage(), ex);
 
         ErrorResponse response = new ErrorResponse(

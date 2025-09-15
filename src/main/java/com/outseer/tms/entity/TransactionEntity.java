@@ -3,6 +3,7 @@ package com.outseer.tms.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -14,6 +15,7 @@ public class TransactionEntity {
     @Id
     private String transactionId;
     private String userId;
-    private Double amount;
+    @Column(precision = 19, scale = 4)
+    private BigDecimal amount;
     private LocalDateTime timestamp;
 }

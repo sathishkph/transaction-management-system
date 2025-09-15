@@ -10,10 +10,14 @@ import com.outseer.tms.exception.UserNotFoundException;
 import com.outseer.tms.helper.DateUtil;
 import com.outseer.tms.repo.TransactionRepository;
 import com.outseer.tms.repo.UserRepository;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +25,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,13 +36,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
+    private final EntityManager entityManager;
 
     private final AccountService accountService;
     private final Map<String, Object> userLocks = new ConcurrentHashMap<>();
 
     @Transactional
     @Retryable(
-            value = {DataAccessException.class}, // only retry db failures
+            value = {TransientDataAccessException.class}, // only retry db failures
             maxAttempts = 3,
             backoff = @Backoff(delay = 200, multiplier = 2)
     )
@@ -51,14 +57,10 @@ public class TransactionService {
                     throw new UserNotFoundException("User not found with id: " + userId);
                 }
 
-                if (transactionRepository.existsById(transactionRequestDto.getTransactionId())) {
-                    throw new DuplicateTransactionIdException("Transaction already exists with id: " + transactionRequestDto.getTransactionId());
-                }
-
                 //validate debit transactions;
-                if (transactionRequestDto.getAmount() < 0) {
+                if (transactionRequestDto.getAmount().compareTo(BigDecimal.ZERO) < 0) {
                     AccountDto accountDto = accountService.findById(userId);
-                    if (accountDto.getCurrentBalance() < Math.abs(transactionRequestDto.getAmount())) {
+                    if (accountDto.getCurrentBalance().compareTo(transactionRequestDto.getAmount().abs()) < 0) {
                         throw new InsufficientBalanceException("Insufficient Balance.Please try again");
                     }
                 }
@@ -67,7 +69,8 @@ public class TransactionService {
                 transactionEntity.setUserId(transactionRequestDto.getUserId());
                 transactionEntity.setAmount(transactionRequestDto.getAmount());
                 transactionEntity.setTimestamp(DateUtil.parseIsoDateTime(transactionRequestDto.getTimeStamp()));
-                transactionRepository.save(transactionEntity);
+                entityManager.persist(transactionEntity);
+                entityManager.flush();
                 response = new Response(true, "Transaction created successfully.");
                 return response;
             } catch (UserNotFoundException e) {
@@ -76,9 +79,9 @@ public class TransactionService {
             } catch (InsufficientBalanceException e) {
                 log.info("Insufficient Balance Exception for this userId:{} ,transactionId : {}", userId, transactionRequestDto.getTransactionId());
                 throw e;
-            } catch (DuplicateTransactionIdException e) {
+            } catch (EntityExistsException | ConstraintViolationException  e) {
                 log.info("Duplicate Transaction ID  Exception for this userId:{} ,transactionId : {}", userId, transactionRequestDto.getTransactionId());
-                throw e;
+                throw new DuplicateTransactionIdException("Transaction already exists with id: " + transactionRequestDto.getTransactionId());
             } catch (Exception e) {
                 log.info("Transactionfor this userId:{},transactionId : {} ,Exception:{}", userId, transactionRequestDto.getTransactionId(), e.getMessage());
                 throw e;

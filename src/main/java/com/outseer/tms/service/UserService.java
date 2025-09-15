@@ -7,10 +7,16 @@ import com.outseer.tms.entity.UserEntity;
 import com.outseer.tms.exception.UserIdAlreadyExistsException;
 import com.outseer.tms.exception.UserNotFoundException;
 import com.outseer.tms.repo.UserRepository;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -24,9 +30,11 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final EntityManager entityManager;
 
+    @Transactional
     @Retryable(
-            value = {DataAccessException.class}, // db failures
+            value = {TransientDataAccessException.class}, // db failures
             maxAttempts = 3,
             backoff = @Backoff(delay = 200, multiplier = 2)
     )
@@ -34,21 +42,19 @@ public class UserService {
         Response response;
         String userId = userRequestDto.getUserId();
         try {
-            if (userRepository.existsById(userId)) {
-                throw new UserIdAlreadyExistsException("User ID already exists for this id:" + userId);
-            }
             UserEntity userEntity = modelMapper.map(userRequestDto, UserEntity.class);
             LocalDateTime now = LocalDateTime.now();
             userEntity.setCreatedAt(now);
-            userRepository.save(userEntity);
+            entityManager.persist(userEntity);
+            entityManager.flush();
             response = new Response(true, "User created successfully.");
             return response;
-        } catch (UserIdAlreadyExistsException e) {
+        } catch (EntityExistsException | ConstraintViolationException e) {
             log.info("User already present for this userId:{}", userId);
-            throw e;
+            throw new UserIdAlreadyExistsException("User ID already exists for this id:" + userId);
         } catch (Exception e) {
             log.info("User creation Exception for this userId:{},Exception:{}", userId, e.getMessage());
-           throw e;
+            throw e;
         }
 
     }
@@ -96,7 +102,7 @@ public class UserService {
             throw e;
         } catch (Exception e) {
             log.info("User deletion Exception for this userId:{},Exception:{}", userId, e.getMessage());
-           throw e;
+            throw e;
         }
     }
 }

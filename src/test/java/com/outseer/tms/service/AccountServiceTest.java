@@ -7,6 +7,8 @@ import com.outseer.tms.repo.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -28,7 +30,7 @@ public class AccountServiceTest {
 
     @Test
     void testFindById_Success() {
-        AccountDto dto = new AccountDto(VALID_USER_ID, 1000.0, 3L);
+        AccountDto dto = new AccountDto(VALID_USER_ID, BigDecimal.valueOf(1000.0), 3L);
 
         when(userRepository.existsById(VALID_USER_ID)).thenReturn(true);
         when(transactionRepository.findBalanceAndCountByUserId(VALID_USER_ID)).thenReturn(dto);
@@ -37,7 +39,7 @@ public class AccountServiceTest {
 
         assertNotNull(result);
         assertEquals(VALID_USER_ID, result.getUserId());
-        assertEquals(1000.0, result.getCurrentBalance());
+        assertEquals(BigDecimal.valueOf(1000.0), result.getCurrentBalance());
         assertEquals(3, result.getTransactionCount());
     }
 
